@@ -89,4 +89,30 @@ def generateDeepFool(test_loader,model,device,num_classes=10, overshoot=0.02, ma
 
 
 
+def generatePGD(test_loader,model,device,eps,attack_iter,criterion):
+    adv_img = []
+    l = []
+    eps = 0.1
+    attack_iter = 20
+    attack_lr = 0.01
     
+    print("Generating PGD Adversarial Images")
+    iterator = tqdm(test_loader,ncols=0, leave=False)
+    for data,labels in iterator:
+        x1 = PGD(model,image,labels,eps,attack_iter,attack_lr,criterion,device,random_init, target, clamp)
+        l.append(labels)
+        x2 = x1.squeeze().cpu().detach().numpy()
+        adv_img.append(x2)
+            
+    x3 = np.array(adv_img)
+    x3 = x3.reshape(10000,1,28,28)
+    l = np.array(l)
+        
+    features_test = torch.from_numpy(x3)
+    targets_test = torch.from_numpy(l)
+
+    new_dataset = torch.utils.data.TensorDataset(features_test,targets_test)
+    new_data_loader = torch.utils.data.DataLoader(new_dataset,100,shuffle = False)
+    
+    
+    return new_data_loader    

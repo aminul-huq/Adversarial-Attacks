@@ -34,26 +34,6 @@ def FGSM(model,img,labels,device,eps,criterion):
     return x
 
 
-def IFGSM(model,img,labels,device,eps,max_iter,criterion):
-    
-    model,img,labels = model.to(device),img.to(device),labels.to(device)
-    x = img.clone().detach().requires_grad_(True).to(device)
-    
-    alpha = eps / 4
-    
-    for _ in range(max_iter):
-        pred = model(x)
-        loss = criterion(pred,labels)
-        loss.backward()
-        noise = x.grad.data
-
-        
-        x.data = x.data + alpha * torch.sign(noise)
-        x.data.clamp_(min=0.0, max=1.0)
-        x.grad.zero_()
-    
-    return x
-
 
 def MIFGSM(model,img,labels,device,eps,momentum,max_iter,criterion):
     
@@ -148,19 +128,44 @@ def deepfool(net, image, device, num_classes=10, overshoot=0.02, max_iter=10):
 
 
 
-## Need to fix the PGD attack
-def PGD(model,image,labels,device,eps,step_size,max_iter,criterion):
+
+def PGD(model,image,labels,eps,attack_steps,attack_lr,criterion,device,random_init = True, target = None, clamp = (0,1)):
     
-    x = image.clone().detach().to(device)
-    x = x + torch.zeros_like(x).uniform_(-eps,eps)
-    for i in range(max_iter):
-        x.requires_grad_()
-        with torch.enable_grad():
-            logits = model(x)
-            loss = criterion(logits,labels,size_average = False)
-        grad = torch.autograd.grad(loss,[x])[0]
-        x = x.detach() + step_size * torch.sign(grad.detach())
-        x = torch.min(torch.max(x,images - eps), images + eps)
-        x= torch.clamp(x,0,1)
+    model,image,labels = model.to(device),image.to(device),labels.to(device)    
         
-    return x
+    x_adv = x.clone()
+    
+    if random_init:
+        x_adv = x_adv + (torch.rand(image.size(),dtype = image.dtype, device = device) - 0.5) *2 * eps
+        
+    for i in range(attack_steps):
+        
+        x_adv.requires_grad = True
+        
+        model.zero_grad()
+        logits = model(x_adv)
+        
+        if target is None:
+            loss = criterion(logits,labels)
+            loss.backward()
+            grad = x_adv.grad.detach()
+            grad = grad.sign()
+            x_adv = x_adv + attack_lr * grad
+        
+        else:
+            assert target.size() == y.size()
+            loss = F.cross_entropy(logits, target)
+            loss.backward()
+            grad = x_adv.grad.detach()
+            grad = grad.sign()
+            x_adv = x_adv - attack_lr * grad
+       
+        x_adv = x + torch.clamp(x_adv - x, min=-eps, max=eps)
+        x_adv = x_adv.detach()
+        x_adv = torch.clamp(x_adv, *clamp)
+        
+        
+    return x_adv
+
+    
+
