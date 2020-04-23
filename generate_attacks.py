@@ -20,7 +20,7 @@ def generateFGSM(test_loader,model,device,eps,criterion):
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,1,28,28)
+    x3 = x3.reshape(10000,3,32,32)
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)
@@ -48,7 +48,7 @@ def generateMIFGSM(test_loader,model,device,eps,momentum,max_iter,criterion):
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,1,28,28)
+    x3 = x3.reshape(10000,3,32,32)
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)
@@ -74,7 +74,7 @@ def generateDeepFool(test_loader,model,device,num_classes=10, overshoot=0.02, ma
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,1,28,28)
+    x3 = x3.reshape(10000,3,32,32)
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)
@@ -99,13 +99,13 @@ def generatePGD(test_loader,model,device,eps,attack_iter,criterion):
     print("Generating PGD Adversarial Images")
     iterator = tqdm(test_loader,ncols=0, leave=False)
     for data,labels in iterator:
-        x1 = PGD(model,image,labels,eps,attack_iter,attack_lr,criterion,device,random_init, target, clamp)
+        x1 = PGD(model,data,labels,eps,attack_iter,attack_lr,criterion,device)
         l.append(labels)
         x2 = x1.squeeze().cpu().detach().numpy()
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,1,28,28)
+    x3 = x3.reshape(10000,3,32,32)
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)

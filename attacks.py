@@ -133,7 +133,7 @@ def PGD(model,image,labels,eps,attack_steps,attack_lr,criterion,device,random_in
     
     model,image,labels = model.to(device),image.to(device),labels.to(device)    
         
-    x_adv = x.clone()
+    x_adv = image.clone()
     
     if random_init:
         x_adv = x_adv + (torch.rand(image.size(),dtype = image.dtype, device = device) - 0.5) *2 * eps
@@ -160,7 +160,7 @@ def PGD(model,image,labels,eps,attack_steps,attack_lr,criterion,device,random_in
             grad = grad.sign()
             x_adv = x_adv - attack_lr * grad
        
-        x_adv = x + torch.clamp(x_adv - x, min=-eps, max=eps)
+        x_adv = image + torch.clamp(x_adv - image, min=-eps, max=eps)
         x_adv = x_adv.detach()
         x_adv = torch.clamp(x_adv, *clamp)
         

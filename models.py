@@ -2,34 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-
-class CNN(nn.Module):
-    def __init__(self,):
-        super(CNN,self).__init__()
-        
-        ##defining layers
-        
-        self.kernel_size = 3
-        
-        self.conv1 = nn.Conv2d(in_channels=1,out_channels=6,kernel_size=self.kernel_size)
-        self.conv2 = nn.Conv2d(in_channels=6,out_channels=12, kernel_size=self.kernel_size)
-        
-        self.fc1 = nn.Linear(12*5*5, 100)
-        self.fc2 = nn.Linear(100, 10)
-        
-    def forward(self,x):
-        x = F.max_pool2d(F.relu(self.conv1(x)),kernel_size=2,stride=2)
-        x = F.max_pool2d(F.relu(self.conv2(x)),kernel_size=2,stride=2)
-
-        #print(x[0].shape)
-        
-        x = F.relu(self.fc1(x.reshape(-1,12*5*5)))
-        
-        x = self.fc2(x)
-        
-        return x
-    
     
 class BasicBlock(nn.Module):
     def __init__(self, in_planes, out_planes, stride, dropRate=0.0):
@@ -118,4 +90,28 @@ class WideResNet(nn.Module):
     
     
     
-    
+class CNN(nn.Module):
+    def __init__(self,):
+        super(CNN,self).__init__()
+        
+        ##defining layers
+        
+        self.kernel_size = 3
+        
+        self.conv1 = nn.Conv2d(in_channels=1,out_channels=6,kernel_size=self.kernel_size)
+        self.conv2 = nn.Conv2d(in_channels=6,out_channels=12, kernel_size=self.kernel_size)
+        
+        self.fc1 = nn.Linear(12*5*5, 100)
+        self.fc2 = nn.Linear(100, 10)
+        
+    def forward(self,x):
+        x = F.max_pool2d(F.relu(self.conv1(x)),kernel_size=2,stride=2)
+        x = F.max_pool2d(F.relu(self.conv2(x)),kernel_size=2,stride=2)
+
+        #print(x[0].shape)
+        
+        x = F.relu(self.fc1(x.reshape(-1,12*5*5)))
+        
+        x = self.fc2(x)
+        
+        return x    

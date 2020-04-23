@@ -1,9 +1,9 @@
-python train_model.py --attack=4 \
+python train_model.py --pretrain=0\
+                        --attack=4 \
                         --lr=0.001\
-                        --itr=20 \
-                        --step_size=100\
+                        --itr=76 \
                         --momentum=0.9\
-                        --eps=0.1\
-                        --step_size=7\
+                        --eps=0.03137\
+                        --step_size=20\
                         --overshoot=0.2\
                         --preprocess=0
