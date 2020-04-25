@@ -6,7 +6,7 @@ from attacks import *
 from tqdm import tqdm
 
 
-def generateFGSM(test_loader,model,device,eps,criterion):
+def generateFGSM(test_loader,model,device,eps,criterion,t):
     adv_img = []
     l = []
     eps = 0.1
@@ -20,7 +20,12 @@ def generateFGSM(test_loader,model,device,eps,criterion):
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,3,32,32)
+    
+    if t == 0:
+        x3 = x3.reshape(50000,3,32,32)
+    else:
+        x3 = x3.reshape(10000,3,32,32)
+        
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)
@@ -89,7 +94,7 @@ def generateDeepFool(test_loader,model,device,num_classes=10, overshoot=0.02, ma
 
 
 
-def generatePGD(test_loader,model,device,eps,attack_iter,criterion):
+def generatePGD(test_loader,model,device,eps,attack_iter,criterion,t):
     adv_img = []
     l = []
     eps = 0.1
@@ -105,12 +110,16 @@ def generatePGD(test_loader,model,device,eps,attack_iter,criterion):
         adv_img.append(x2)
             
     x3 = np.array(adv_img)
-    x3 = x3.reshape(10000,3,32,32)
+    if t == 0:
+        x3 = x3.reshape(50000,3,32,32)
+    else:
+        x3 = x3.reshape(10000,3,32,32)
+        
     l = np.array(l)
         
     features_test = torch.from_numpy(x3)
     targets_test = torch.from_numpy(l)
-
+    
     new_dataset = torch.utils.data.TensorDataset(features_test,targets_test)
     new_data_loader = torch.utils.data.DataLoader(new_dataset,100,shuffle = False)
     
